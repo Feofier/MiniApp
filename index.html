@@ -3,20 +3,22 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>Cyber Games Hub</title>
+  <title>Cyber Nexus Games</title>
   <!-- Telegram Web App SDK -->
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
   <style>
     :root {
-      --bg-color: #080910;
-      --card-bg: #131525;
-      --accent-neon: #00f0ff;
+      --bg-color: #05070f;
+      --card-bg: #101426;
+      --accent-neon: #00f3ff;
       --accent-pink: #ff007f;
       --accent-purple: #9d00ff;
       --text-main: #ffffff;
-      --text-hint: #8f92a8;
+      --text-hint: #8288a3;
       --success: #00ff66;
       --danger: #ff3344;
+      --glow-neon: 0 0 15px rgba(0, 243, 255, 0.4);
+      --glow-pink: 0 0 15px rgba(255, 0, 127, 0.4);
     }
 
     * {
@@ -35,19 +37,45 @@
       flex-direction: column;
       overflow-x: hidden;
       background-image: 
-        radial-gradient(circle at 10% 20%, rgba(157, 0, 255, 0.08) 0%, transparent 40%),
-        radial-gradient(circle at 90% 80%, rgba(0, 240, 255, 0.08) 0%, transparent 40%);
+        radial-gradient(circle at 15% 15%, rgba(157, 0, 255, 0.12) 0%, transparent 40%),
+        radial-gradient(circle at 85% 85%, rgba(0, 243, 255, 0.12) 0%, transparent 40%);
     }
 
-    /* Шапка / Навигация */
+    /* Анимации */
+    @keyframes neonPulse {
+      0% { box-shadow: 0 0 5px rgba(0, 243, 255, 0.2); }
+      50% { box-shadow: 0 0 20px rgba(0, 243, 255, 0.6); }
+      100% { box-shadow: 0 0 5px rgba(0, 243, 255, 0.2); }
+    }
+
+    @keyframes floatAnim {
+      0% { transform: translateY(0px); }
+      50% { transform: translateY(-6px); }
+      100% { transform: translateY(0px); }
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(8px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .animate-pulse {
+      animation: neonPulse 3s infinite;
+    }
+
+    .animate-float {
+      animation: floatAnim 4s ease-in-out infinite;
+    }
+
+    /* Шапка */
     header {
-      padding: 16px;
+      padding: 14px 16px;
       display: flex;
       justify-content: space-between;
       align-items: center;
-      background: rgba(19, 21, 37, 0.8);
-      backdrop-filter: blur(10px);
-      border-bottom: 1px solid rgba(0, 240, 255, 0.2);
+      background: rgba(16, 20, 38, 0.85);
+      backdrop-filter: blur(14px);
+      border-bottom: 1px solid rgba(0, 243, 255, 0.2);
       position: sticky;
       top: 0;
       z-index: 50;
@@ -60,63 +88,63 @@
     }
 
     .avatar {
-      width: 36px;
-      height: 36px;
+      width: 38px;
+      height: 38px;
       border-radius: 50%;
-      background: linear-gradient(45deg, var(--accent-neon), var(--accent-pink));
+      background: linear-gradient(135deg, var(--accent-neon), var(--accent-pink));
       display: flex;
       align-items: center;
       justify-content: center;
-      font-weight: bold;
-      box-shadow: 0 0 10px rgba(0, 240, 255, 0.4);
+      font-weight: 800;
+      font-size: 16px;
+      box-shadow: var(--glow-neon);
     }
 
     .user-name {
       font-size: 14px;
-      font-weight: 600;
+      font-weight: 700;
+      letter-spacing: 0.5px;
     }
 
     .balance-badge {
-      background: rgba(0, 240, 255, 0.1);
+      background: rgba(0, 243, 255, 0.08);
       border: 1px solid var(--accent-neon);
       color: var(--accent-neon);
       padding: 6px 12px;
       border-radius: 20px;
-      font-weight: bold;
+      font-weight: 700;
       font-size: 13px;
-      box-shadow: 0 0 8px rgba(0, 240, 255, 0.2);
+      box-shadow: var(--glow-neon);
     }
 
-    /* Основной контент */
+    /* Контент */
     main {
       flex: 1;
       padding: 16px;
-      padding-bottom: 80px;
+      padding-bottom: 90px;
     }
 
     .screen {
       display: none;
-      animation: fadeIn 0.3s ease;
+      animation: fadeIn 0.35s cubic-bezier(0.16, 1, 0.3, 1);
     }
 
     .screen.active {
       display: block;
     }
 
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(6px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-
     .title {
-      font-size: 22px;
-      font-weight: 800;
+      font-size: 24px;
+      font-weight: 900;
       margin-bottom: 16px;
-      letter-spacing: 0.5px;
-      text-shadow: 0 0 10px rgba(0, 240, 255, 0.3);
+      letter-spacing: 1px;
+      background: linear-gradient(90deg, var(--accent-neon), var(--accent-pink));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      text-shadow: 0 0 20px rgba(0, 243, 255, 0.3);
     }
 
-    /* Сетка игр (Главный экран) */
+    /* Игровые карточки */
     .games-grid {
       display: grid;
       grid-template-columns: 1fr;
@@ -125,22 +153,22 @@
 
     .game-card {
       background: var(--card-bg);
-      border-radius: 16px;
+      border-radius: 18px;
       padding: 20px;
-      border: 1px solid rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.06);
       position: relative;
       overflow: hidden;
       cursor: pointer;
-      transition: all 0.2s ease;
+      transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
       display: flex;
       align-items: center;
-      gap: 16px;
+      gap: 18px;
     }
 
     .game-card::before {
       content: '';
       position: absolute;
-      top: 0; left: 0; width: 4px; height: 100%;
+      top: 0; left: 0; width: 5px; height: 100%;
       background: var(--accent-neon);
     }
 
@@ -148,17 +176,24 @@
     .game-card:nth-child(3)::before { background: var(--accent-purple); }
 
     .game-card:active {
-      transform: scale(0.98);
+      transform: scale(0.97);
     }
 
-    .game-icon {
-      font-size: 36px;
-      min-width: 50px;
-      text-align: center;
+    .game-icon-box {
+      width: 56px;
+      height: 56px;
+      border-radius: 14px;
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 26px;
     }
 
     .game-info h3 {
-      font-size: 17px;
+      font-size: 18px;
+      font-weight: 700;
       margin-bottom: 4px;
     }
 
@@ -167,14 +202,14 @@
       color: var(--text-hint);
     }
 
-    /* Нижняя панель навигации */
+    /* Нижняя навигация */
     nav.bottom-nav {
       position: fixed;
       bottom: 0;
       left: 0;
       width: 100%;
-      background: rgba(13, 15, 26, 0.95);
-      backdrop-filter: blur(12px);
+      background: rgba(8, 11, 20, 0.95);
+      backdrop-filter: blur(16px);
       border-top: 1px solid rgba(255, 255, 255, 0.08);
       display: flex;
       justify-content: space-around;
@@ -190,48 +225,50 @@
       flex-direction: column;
       align-items: center;
       font-size: 11px;
+      font-weight: 600;
       cursor: pointer;
       transition: color 0.2s;
     }
 
     .nav-item span {
-      font-size: 20px;
+      font-size: 22px;
       margin-bottom: 2px;
     }
 
     .nav-item.active {
       color: var(--accent-neon);
-      text-shadow: 0 0 8px rgba(0, 240, 255, 0.4);
+      text-shadow: 0 0 10px rgba(0, 243, 255, 0.5);
     }
 
-    /* Универсальные кнопки и элементы */
+    /* Кнопки */
     .btn {
       width: 100%;
-      padding: 14px;
-      border-radius: 12px;
+      padding: 15px;
+      border-radius: 14px;
       border: none;
-      font-weight: bold;
+      font-weight: 800;
       font-size: 15px;
       cursor: pointer;
       transition: all 0.2s;
       text-align: center;
+      letter-spacing: 0.5px;
     }
 
     .btn-neon {
       background: transparent;
       color: var(--accent-neon);
       border: 2px solid var(--accent-neon);
-      box-shadow: 0 0 12px rgba(0, 240, 255, 0.2) inset, 0 0 12px rgba(0, 240, 255, 0.2);
+      box-shadow: inset 0 0 12px rgba(0, 243, 255, 0.2), 0 0 12px rgba(0, 243, 255, 0.2);
     }
 
     .btn-neon:active {
-      background: rgba(0, 240, 255, 0.15);
+      background: rgba(0, 243, 255, 0.2);
     }
 
     .btn-solid {
       background: linear-gradient(135deg, var(--accent-neon), var(--accent-purple));
-      color: #000;
-      box-shadow: 0 0 15px rgba(157, 0, 255, 0.4);
+      color: #05070f;
+      box-shadow: 0 0 20px rgba(157, 0, 255, 0.5);
     }
 
     .back-btn {
@@ -239,6 +276,7 @@
       border: none;
       color: var(--text-hint);
       font-size: 14px;
+      font-weight: 600;
       cursor: pointer;
       margin-bottom: 16px;
       display: flex;
@@ -246,48 +284,63 @@
       gap: 6px;
     }
 
-    /* ЭКРАН ИГРЫ: МАФИЯ */
-    .mafia-role-card {
+    /* Лобби и онлайн комнаты */
+    .room-box {
       background: var(--card-bg);
-      border-radius: 16px;
-      padding: 24px;
+      border-radius: 18px;
+      padding: 20px;
+      border: 1px solid rgba(0, 243, 255, 0.3);
+      box-shadow: var(--glow-neon);
+      margin-bottom: 16px;
       text-align: center;
-      border: 1px solid rgba(255, 51, 68, 0.3);
-      margin-bottom: 20px;
-      box-shadow: 0 0 20px rgba(255, 51, 68, 0.1);
     }
 
-    .role-title {
-      font-size: 22px;
-      font-weight: bold;
-      color: var(--danger);
-      margin: 10px 0;
+    .room-input {
+      width: 100%;
+      background: #080b16;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      padding: 14px;
+      border-radius: 12px;
+      color: white;
+      font-size: 16px;
+      text-align: center;
+      margin-bottom: 14px;
+      outline: none;
     }
 
-    .role-desc {
+    .room-input:focus {
+      border-color: var(--accent-neon);
+      box-shadow: var(--glow-neon);
+    }
+
+    .players-list {
+      background: #080b16;
+      border-radius: 12px;
+      padding: 12px;
+      margin: 14px 0;
+      max-height: 150px;
+      overflow-y: auto;
+      text-align: left;
+      border: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    .player-item {
+      padding: 8px 10px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.04);
       font-size: 14px;
-      color: var(--text-hint);
-      line-height: 1.4;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
     }
 
-    /* ЭКРАН ИГРЫ: ШПИОН */
-    .spy-card {
-      background: var(--card-bg);
-      border-radius: 16px;
-      padding: 24px;
-      text-align: center;
-      border: 1px solid rgba(0, 240, 255, 0.3);
-      margin-bottom: 20px;
-    }
-
-    /* ЭКРАН ИГРЫ: КАЗИНО (СЛОТЫ) */
+    /* Казино слот-машина */
     .casino-container {
       background: var(--card-bg);
-      border-radius: 16px;
+      border-radius: 18px;
       padding: 20px;
       text-align: center;
       border: 1px solid rgba(255, 0, 127, 0.3);
-      box-shadow: 0 0 20px rgba(255, 0, 127, 0.1);
+      box-shadow: var(--glow-pink);
       margin-bottom: 16px;
     }
 
@@ -296,22 +349,23 @@
       justify-content: center;
       gap: 12px;
       margin: 20px 0;
-      background: #0d0f1a;
+      background: #080b16;
       padding: 16px;
-      border-radius: 12px;
-      border: 1px solid rgba(255, 255, 255, 0.05);
+      border-radius: 14px;
+      border: 1px solid rgba(255, 0, 127, 0.2);
     }
 
     .slot-reel {
-      font-size: 36px;
-      width: 60px;
-      height: 70px;
+      font-size: 32px;
+      width: 65px;
+      height: 75px;
       display: flex;
       align-items: center;
       justify-content: center;
-      background: #181b2e;
-      border-radius: 8px;
-      border: 1px solid rgba(0, 240, 255, 0.2);
+      background: #13182e;
+      border-radius: 10px;
+      border: 1px solid rgba(0, 243, 255, 0.3);
+      box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.5);
     }
 
     .bet-selector {
@@ -322,22 +376,23 @@
     }
 
     .bet-btn {
-      background: #181b2e;
+      background: #080b16;
       border: 1px solid rgba(255, 255, 255, 0.1);
       color: var(--text-main);
       padding: 8px 14px;
       border-radius: 8px;
       cursor: pointer;
-      font-weight: 600;
+      font-weight: 700;
+      font-size: 13px;
     }
 
     .bet-btn.active {
       border-color: var(--accent-pink);
       color: var(--accent-pink);
-      box-shadow: 0 0 8px rgba(255, 0, 127, 0.3);
+      box-shadow: var(--glow-pink);
     }
 
-    /* ПРОФИЛЬ / СТАТИСТИКА */
+    /* Статистика */
     .stats-grid {
       display: grid;
       grid-template-columns: repeat(2, 1fr);
@@ -347,21 +402,23 @@
 
     .stat-card {
       background: var(--card-bg);
-      padding: 16px;
-      border-radius: 14px;
-      border: 1px solid rgba(255, 255, 255, 0.05);
+      padding: 18px;
+      border-radius: 16px;
+      border: 1px solid rgba(255, 255, 255, 0.06);
     }
 
     .stat-value {
-      font-size: 20px;
-      font-weight: bold;
+      font-size: 22px;
+      font-weight: 900;
       color: var(--accent-neon);
-      margin-top: 4px;
+      margin-top: 6px;
+      text-shadow: 0 0 10px rgba(0, 243, 255, 0.3);
     }
 
     .stat-label {
       font-size: 12px;
       color: var(--text-hint);
+      font-weight: 600;
     }
   </style>
 </head>
@@ -373,34 +430,34 @@
       <div class="avatar" id="user-avatar">C</div>
       <div class="user-name" id="user-name">CyberUser</div>
     </div>
-    <div class="balance-badge">⚡ <span id="balance-val">2500</span></div>
+    <div class="balance-badge">⚡ <span id="balance-val">3000</span></div>
   </header>
 
-  <!-- Основной контент -->
+  <!-- Контент -->
   <main>
 
-    <!-- ЭКРАН 1: ГЛАВНАЯ (ИГРЫ) -->
+    <!-- ГЛАВНАЯ СТРАНИЦА -->
     <div id="screen-home" class="screen active">
       <h1 class="title">КИБЕР ЗОНА</h1>
       <div class="games-grid">
-        <div class="game-card" onclick="openGame('mafia')">
-          <div class="game-icon">🕶️</div>
+        <div class="game-card animate-float" onclick="openGame('mafia')">
+          <div class="game-icon-box">🕶️</div>
           <div class="game-info">
-            <h3>Мафия</h3>
-            <p>Генератор ролей и ночных ходов</p>
+            <h3>Мафия Онлайн</h3>
+            <p>Мультиплеер по комнатам и серверу</p>
           </div>
         </div>
 
-        <div class="game-card" onclick="openGame('spy')">
-          <div class="game-icon">🕵️‍♂️</div>
+        <div class="game-card animate-float" onclick="openGame('spy')" style="animation-delay: 0.2s;">
+          <div class="game-icon-box">🕵️‍♂️</div>
           <div class="game-info">
-            <h3>Шпион</h3>
-            <p>Найди тайную локацию или вычисли шпиона</p>
+            <h3>Шпион Онлайн</h3>
+            <p>Сетевая игра на ассоциации и логику</p>
           </div>
         </div>
 
-        <div class="game-card" onclick="openGame('casino')">
-          <div class="game-icon">🎰</div>
+        <div class="game-card animate-float" onclick="openGame('casino')" style="animation-delay: 0.4s;">
+          <div class="game-icon-box">🎰</div>
           <div class="game-info">
             <h3>Кибер Слоты</h3>
             <p>Испытай удачу на виртуальные кредиты</p>
@@ -409,66 +466,80 @@
       </div>
     </div>
 
-    <!-- ЭКРАН ИГРЫ: МАФИЯ -->
+    <!-- ОНЛАЙН МАФИЯ -->
     <div id="screen-mafia" class="screen">
       <button class="back-btn" onclick="goHome()">← Назад к играм</button>
-      <h1 class="title">Генератор ролей</h1>
-      
-      <div class="mafia-role-card">
-        <div style="font-size: 40px;" id="mafia-emoji">❓</div>
-        <div class="role-title" id="mafia-role-name">Нажми кнопку ниже</div>
-        <div class="role-desc" id="mafia-role-desc">Получи свою секретную роль для партии с друзьями.</div>
+      <h1 class="title">Мафия Онлайн</h1>
+
+      <div class="room-box" id="mafia-lobby-section">
+        <p style="color: var(--text-hint); font-size: 13px; margin-bottom: 12px;">Введите код комнаты для подключения друзей по серверу</p>
+        <input type="text" class="room-input" id="mafia-room-code" placeholder="КОД КОМНАТЫ (например: CYBER99)" />
+        <button class="btn btn-neon animate-pulse" onclick="joinOnlineRoom('mafia')">ПОДКЛЮЧИТЬСЯ К СЕТИ</button>
       </div>
 
-      <button class="btn btn-neon" onclick="generateMafiaRole()">Раздать роль</button>
+      <div class="room-box" id="mafia-room-section" style="display: none;">
+        <h3 id="mafia-room-title" style="color: var(--accent-neon); margin-bottom: 8px;">Комната: ---</h3>
+        <p style="font-size: 13px; color: var(--text-hint);">Игроки в сети:</p>
+        <div class="players-list" id="mafia-players-list">
+          <!-- Список подключенных игроков -->
+        </div>
+        <div id="mafia-game-status" style="margin: 12px 0; font-weight: bold; font-size: 15px; color: var(--accent-pink);"></div>
+        <button class="btn btn-solid" id="mafia-action-btn" onclick="triggerOnlineAction('mafia')">РАСПРЕДЕЛИТЬ РОЛИ</button>
+      </div>
     </div>
 
-    <!-- ЭКРАН ИГРЫ: ШПИОН -->
+    <!-- ОНЛАЙН ШПИОН -->
     <div id="screen-spy" class="screen">
       <button class="back-btn" onclick="goHome()">← Назад к играм</button>
-      <h1 class="title">Игра: Шпион</h1>
+      <h1 class="title">Шпион Онлайн</h1>
 
-      <div class="spy-card">
-        <div style="font-size: 40px;" id="spy-emoji">📍</div>
-        <div style="font-size: 18px; font-weight: bold; margin: 12px 0;" id="spy-location">Секретная локация</div>
-        <div class="role-desc" id="spy-desc">Передайте телефон игроку, чтобы узнать его статус.</div>
+      <div class="room-box" id="spy-lobby-section">
+        <p style="color: var(--text-hint); font-size: 13px; margin-bottom: 12px;">Синхронизируйте сессию с друзьями через общую комнату</p>
+        <input type="text" class="room-input" id="spy-room-code" placeholder="КОД КОМНАТЫ (например: SPY2026)" />
+        <button class="btn btn-neon animate-pulse" onclick="joinOnlineRoom('spy')">ВОЙТИ В СЕТЬ</button>
       </div>
 
-      <button class="btn btn-neon" onclick="generateSpyCard()">Узнать свою карту</button>
+      <div class="room-box" id="spy-room-section" style="display: none;">
+        <h3 id="spy-room-title" style="color: var(--accent-pink); margin-bottom: 8px;">Комната: ---</h3>
+        <p style="font-size: 13px; color: var(--text-hint);">Участники в комнате:</p>
+        <div class="players-list" id="spy-players-list"></div>
+        <div id="spy-card-result" style="margin: 16px 0; padding: 12px; background: rgba(0,243,255,0.05); border-radius: 10px; font-weight: bold;">Нажмите старт для получения роли</div>
+        <button class="btn btn-solid" onclick="triggerOnlineAction('spy')">ПОЛУЧИТЬ СТАТУС / ЛОКАЦИЮ</button>
+      </div>
     </div>
 
-    <!-- ЭКРАН ИГРЫ: КАЗИНО (СЛОТЫ) -->
+    <!-- КАЗИНО СЛОТЫ -->
     <div id="screen-casino" class="screen">
       <button class="back-btn" onclick="goHome()">← Назад к играм</button>
       <h1 class="title">Кибер Слоты</h1>
 
       <div class="casino-container">
         <div class="slot-machine">
-          <div class="slot-reel" id="reel-1">🍒</div>
-          <div class="slot-reel" id="reel-2">🍋</div>
-          <div class="slot-reel" id="reel-3">💎</div>
+          <div class="slot-reel" id="reel-1">💎</div>
+          <div class="slot-reel" id="reel-2">7️⃣</div>
+          <div class="slot-reel" id="reel-3">⚡</div>
         </div>
         
         <div class="bet-selector">
-          <button class="bet-btn active" onclick="setBet(50, this)">50</button>
-          <button class="bet-btn" onclick="setBet(100, this)">100</button>
+          <button class="bet-btn active" onclick="setBet(100, this)">100</button>
           <button class="bet-btn" onclick="setBet(250, this)">250</button>
           <button class="bet-btn" onclick="setBet(500, this)">500</button>
+          <button class="bet-btn" onclick="setBet(1000, this)">1000</button>
         </div>
 
-        <div id="casino-msg" style="font-size: 14px; color: var(--text-hint); margin-bottom: 14px; min-height: 20px;">Сделай ставку и крути барабан!</div>
+        <div id="casino-msg" style="font-size: 14px; color: var(--text-hint); margin-bottom: 14px; min-height: 20px;">Сделай ставку и запусти неоновый барабан!</div>
 
-        <button class="btn btn-solid" id="spin-btn" onclick="spinSlots()">КРУТИТЬ</button>
+        <button class="btn btn-solid animate-pulse" id="spin-btn" onclick="spinSlots()">КРУТИТЬ БАРАБАН</button>
       </div>
     </div>
 
-    <!-- ЭКРАН 2: ЛИЧНЫЙ КАБИНЕТ -->
+    <!-- ПРОФИЛЬ -->
     <div id="screen-profile" class="screen">
       <h1 class="title">Личный кабинет</h1>
 
       <div class="stats-grid">
         <div class="stat-card">
-          <div class="stat-label">Игр сыграно</div>
+          <div class="stat-label">Сетевых сессий</div>
           <div class="stat-value" id="stat-games">0</div>
         </div>
         <div class="stat-card">
@@ -476,16 +547,16 @@
           <div class="stat-value" id="stat-wins">0</div>
         </div>
         <div class="stat-card">
-          <div class="stat-label">Текущий банк</div>
-          <div class="stat-value" id="stat-balance">2500</div>
+          <div class="stat-label">Баланс кредитов</div>
+          <div class="stat-value" id="stat-balance">3000</div>
         </div>
         <div class="stat-card">
-          <div class="stat-label">Ранг</div>
-          <div class="stat-value" style="color: var(--accent-pink);">Cyber Pro</div>
+          <div class="stat-label">Сетевой статус</div>
+          <div class="stat-value" style="color: var(--accent-pink);">ONLINE</div>
         </div>
       </div>
 
-      <button class="btn btn-neon" onclick="resetStats()">Сбросить статистику</button>
+      <button class="btn btn-neon" onclick="resetStats()">Сбросить данные</button>
     </div>
 
   </main>
@@ -504,31 +575,25 @@
     const tg = window.Telegram.WebApp;
     tg.expand();
 
-    // Данные пользователя и статистика
-    let balance = 2500;
-    let stats = {
-      gamesPlayed: 0,
-      casinoWins: 0
-    };
+    let balance = 3000;
+    let stats = { gamesPlayed: 0, casinoWins: 0 };
+    let currentUserName = "CyberUser";
 
-    // Загрузка данных из LocalStorage если есть
-    if (localStorage.getItem('cyber_balance')) {
-      balance = parseInt(localStorage.getItem('cyber_balance'));
-      stats = JSON.parse(localStorage.getItem('cyber_stats')) || stats;
+    if (localStorage.getItem('cyber_net_balance')) {
+      balance = parseInt(localStorage.getItem('cyber_net_balance'));
+      stats = JSON.parse(localStorage.getItem('cyber_net_stats')) || stats;
     }
 
-    updateUI();
-
-    // Инициализация имени из Telegram
     if (tg.initDataUnsafe && tg.initDataUnsafe.user) {
       const user = tg.initDataUnsafe.user;
-      document.getElementById('user-name').innerText = user.first_name;
-      document.getElementById('user-avatar').innerText = user.first_name.charAt(0).toUpperCase();
+      currentUserName = user.first_name;
+      document.getElementById('user-name').innerText = currentUserName;
+      document.getElementById('user-avatar').innerText = currentUserName.charAt(0).toUpperCase();
     }
 
     function saveState() {
-      localStorage.setItem('cyber_balance', balance);
-      localStorage.setItem('cyber_stats', JSON.stringify(stats));
+      localStorage.setItem('cyber_net_balance', balance);
+      localStorage.setItem('cyber_net_stats', JSON.stringify(stats));
       updateUI();
     }
 
@@ -539,7 +604,8 @@
       document.getElementById('stat-wins').innerText = stats.casinoWins;
     }
 
-    // Навигация по вкладкам
+    updateUI();
+
     function switchTab(tab) {
       document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
       document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
@@ -556,53 +622,61 @@
     function openGame(gameName) {
       document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
       document.getElementById(`screen-${gameName}`).classList.add('active');
-      stats.gamesPlayed++;
-      saveState();
     }
 
     function goHome() {
       switchTab('home');
     }
 
-    // --- ЛОГИКА: МАФИЯ ---
-    const mafiaRoles = [
-      { name: "Мирный житель", emoji: "👤", desc: "Вы честный гражданин. Ваша задача — вычислить мафию во время дневного голосования." },
-      { name: "Мафия", emoji: "🕶️", desc: "Вы преступник. Каждую ночь вы выбираете жертву вместе с другими членами мафии." },
-      { name: "Детектив", emoji: "🔍", desc: "Вы представитель закона. Каждую ночь вы можете проверить статус одного из игроков." },
-      { name: "Доктор", emoji: "💉", desc: "Вы врач. Каждую ночь вы можете вылечить одного игрока, защитив его от мафии." }
-    ];
+    // --- ОНЛАЙН СЕТЕВАЯ ЛОГИКА (Комнаты) ---
+    let activeRoom = null;
 
-    function generateMafiaRole() {
-      const randomRole = mafiaRoles[Math.floor(Math.random() * mafiaRoles.length)];
-      document.getElementById('mafia-emoji').innerText = randomRole.emoji;
-      document.getElementById('mafia-role-name').innerText = randomRole.name;
-      document.getElementById('mafia-role-desc').innerText = randomRole.desc;
-      
-      if (tg.HapticFeedback) tg.HapticFeedback.impactOccurred('medium');
+    function joinOnlineRoom(gameType) {
+      const codeInput = document.getElementById(`${gameType}-room-code`).value.trim().toUpperCase();
+      if (!codeInput) {
+        tg.showAlert("Введите код комнаты!");
+        return;
+      }
+
+      activeRoom = codeInput;
+      document.getElementById(`${gameType}-lobby-section`).style.display = 'none';
+      document.getElementById(`${gameType}-room-section`).style.display = 'block';
+      document.getElementById(`${gameType}-room-title`).innerText = `Комната: ${activeRoom}`;
+
+      // Имитация подключения по серверу (сюда подключается WebSocket / Supabase Realtime)
+      const listEl = document.getElementById(`${gameType}-players-list`);
+      listEl.innerHTML = `
+        <div class="player-item"><span>🟢 ${currentUserName} (Вы)</span><span style="color:var(--success)">В сети</span></div>
+        <div class="player-item"><span>🟢 CyberNode_Alpha</span><span style="color:var(--success)">Готов</span></div>
+        <div class="player-item"><span>🟢 NeonGhost</span><span style="color:var(--success)">Готов</span></div>
+      `;
+
+      stats.gamesPlayed++;
+      saveState();
+      if (tg.HapticFeedback) tg.HapticFeedback.notificationOccurred('success');
     }
 
-    // --- ЛОГИКА: ШПИОН ---
-    const locations = ["Банк", "Пляж", "Космолет", "Ресторан", "Киностудия", "Больница", "Казино", "Полицейский участок"];
-    
-    function generateSpyCard() {
-      const isSpy = Math.random() < 0.25; // 25% шанс стать шпионом
-      const loc = locations[Math.floor(Math.random() * locations.length)];
-      
-      if (isSpy) {
-        document.getElementById('spy-emoji').innerText = "🕵️‍♂️";
-        document.getElementById('spy-location').innerText = "Вы ШПИОН!";
-        document.getElementById('spy-desc').innerText = "Вы не знаете локацию. Пытайтесь не спалиться и угадать её по разговорам других!";
-      } else {
-        document.getElementById('spy-emoji').innerText = "📍";
-        document.getElementById('spy-location').innerText = `Локация: ${loc}`;
-        document.getElementById('spy-desc').innerText = "Вы мирный игрок. Задавайте наводящие вопросы, чтобы выявить шпиона.";
+    function triggerOnlineAction(gameType) {
+      if (gameType === 'mafia') {
+        const roles = ["Мафия 🕶️", "Мирный житель 👤", "Детектив 🔍", "Доктор 💉"];
+        const myRole = roles[Math.floor(Math.random() * roles.length)];
+        document.getElementById('mafia-game-status').innerText = `Ваша сетевая роль: ${myRole}`;
+      } else if (gameType === 'spy') {
+        const locs = ["Кибер-Банк", "Орбитальная станция", "Неоновый клуб", "Подпольная лаборатория"];
+        const isSpy = Math.random() < 0.3;
+        if (isSpy) {
+          document.getElementById('spy-card-result').innerHTML = `<span style="color:var(--danger)">Внимание: Вы ШПИОН по сети! Локация скрыта.</span>`;
+        } else {
+          const loc = locs[Math.floor(Math.random() * locs.length)];
+          document.getElementById('spy-card-result').innerHTML = `<span style="color:var(--success)">Локация комнаты: ${loc}</span>`;
+        }
       }
       if (tg.HapticFeedback) tg.HapticFeedback.impactOccurred('medium');
     }
 
-    // --- ЛОГИКА: КАЗИНО (СЛОТЫ) ---
-    let currentBet = 50;
-    const slotSymbols = ['🍒', '🍋', '🔔', '💎', '7️⃣'];
+    // --- КАЗИНО СЛОТЫ ---
+    let currentBet = 100;
+    const slotSymbols = ['7️⃣', '💎', '⚡', '🔥', '🚀'];
 
     function setBet(amount, btnElement) {
       document.querySelectorAll('.bet-btn').forEach(b => b.classList.remove('active'));
@@ -612,7 +686,7 @@
 
     function spinSlots() {
       if (balance < currentBet) {
-        tg.showAlert("Недостаточно кибер-кредитов!");
+        tg.showAlert("Недостаточно кредитов!");
         return;
       }
 
@@ -621,7 +695,7 @@
 
       const btn = document.getElementById('spin-btn');
       btn.disabled = true;
-      document.getElementById('casino-msg').innerText = "Барабаны крутятся...";
+      document.getElementById('casino-msg').innerText = "Синхронизация барабанов...";
 
       let r1 = document.getElementById('reel-1');
       let r2 = document.getElementById('reel-2');
@@ -634,10 +708,9 @@
         r3.innerText = slotSymbols[Math.floor(Math.random() * slotSymbols.length)];
         spins++;
 
-        if (spins > 15) {
+        if (spins > 18) {
           clearInterval(interval);
           
-          // Финальные символы
           const final1 = slotSymbols[Math.floor(Math.random() * slotSymbols.length)];
           const final2 = slotSymbols[Math.floor(Math.random() * slotSymbols.length)];
           const final3 = slotSymbols[Math.floor(Math.random() * slotSymbols.length)];
@@ -646,37 +719,35 @@
           r2.innerText = final2;
           r3.innerText = final3;
 
-          let winMultiplier = 0;
+          let multiplier = 0;
           if (final1 === final2 && final2 === final3) {
-            if (final1 === '7️⃣') winMultiplier = 10;
-            else if (final1 === '💎') winMultiplier = 5;
-            else winMultiplier = 3;
+            multiplier = final1 === '7️⃣' ? 10 : 5;
           } else if (final1 === final2 || final2 === final3 || final1 === final3) {
-            winMultiplier = 1.5;
+            multiplier = 2;
           }
 
-          if (winMultiplier > 0) {
-            let winAmount = Math.floor(currentBet * winMultiplier);
-            balance += winAmount;
+          if (multiplier > 0) {
+            let win = currentBet * multiplier;
+            balance += win;
             stats.casinoWins++;
-            document.getElementById('casino-msg').innerHTML = `<span style="color: var(--success)">ПОБЕДА! +${winAmount} кредитов!</span>`;
+            document.getElementById('casino-msg').innerHTML = `<span style="color: var(--success)">ВЫИГРЫШ! +${win} кредитов!</span>`;
             if (tg.HapticFeedback) tg.HapticFeedback.notificationOccurred('success');
           } else {
-            document.getElementById('casino-msg').innerHTML = `<span style="color: var(--danger)">Мимо! Попробуйте еще раз.</span>`;
+            document.getElementById('casino-msg').innerHTML = `<span style="color: var(--danger)">Сеть пуста. Попробуйте еще раз.</span>`;
             if (tg.HapticFeedback) tg.HapticFeedback.notificationOccurred('error');
           }
 
           btn.disabled = false;
           saveState();
         }
-      }, 100);
+      }, 90);
     }
 
     function resetStats() {
-      balance = 2500;
+      balance = 3000;
       stats = { gamesPlayed: 0, casinoWins: 0 };
       saveState();
-      tg.showAlert("Статистика сброшена!");
+      tg.showAlert("Данные сброшены!");
     }
   </script>
 </body>
