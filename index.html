@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>Case Opener Mini App</title>
+  <!-- Telegram Web App SDK -->
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+  <style>
+    :root {
+      --bg-color: var(--tg-theme-bg-color, #12131c);
+      --text-color: var(--tg-theme-text-color, #ffffff);
+      --hint-color: var(--tg-theme-hint-color, #8a8d9b);
+      --button-color: var(--tg-theme-button-color, #2ea6ff);
+      --button-text-color: var(--tg-theme-button-text-color, #ffffff);
+      --card-bg: #1c1e2d;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      user-select: none;
+    }
+
+    body {
+      background-color: var(--bg-color);
+      color: var(--text-color);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* Навигация / Шапка */
+    header {
+      padding: 16px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: var(--card-bg);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    .user-info {
+      font-weight: 600;
+      font-size: 15px;
+    }
+
+    .balance {
+      background: rgba(255, 215, 0, 0.15);
+      color: #ffd700;
+      padding: 6px 12px;
+      border-radius: 20px;
+      font-weight: bold;
+      font-size: 14px;
+    }
+
+    /* Главный контейнер */
+    main {
+      flex: 1;
+      padding: 16px;
+    }
+
+    .section-title {
+      font-size: 18px;
+      margin-bottom: 12px;
+    }
+
+    /* Сетка кейсов */
+    .cases-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+    }
+
+    .case-card {
+      background: var(--card-bg);
+      border-radius: 14px;
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      cursor: pointer;
+      transition: transform 0.1s ease;
+    }
+
+    .case-card:active {
+      transform: scale(0.97);
+    }
+
+    .case-icon {
+      font-size: 48px;
+      margin-bottom: 8px;
+    }
+
+    .case-name {
+      font-weight: 600;
+      font-size: 15px;
+      margin-bottom: 4px;
+    }
+
+    .case-price {
+      font-size: 13px;
+      color: #ffd700;
+      font-weight: 500;
+    }
+
+    /* Модальное окно открытия кейса */
+    .modal {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.85);
+      z-index: 100;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      padding: 20px;
+    }
+
+    .modal.active {
+      display: flex;
+    }
+
+    .roulette-container {
+      width: 100%;
+      max-width: 340px;
+      height: 100px;
+      background: var(--card-bg);
+      border-radius: 12px;
+      position: relative;
+      overflow: hidden;
+      border: 2px solid var(--button-color);
+      margin-bottom: 24px;
+    }
+
+    /* Указатель центра рулетки */
+    .roulette-pointer {
+      position: absolute;
+      top: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 4px;
+      height: 100%;
+      background: #ff4757;
+      z-index: 10;
+      box-shadow: 0 0 8px #ff4757;
+    }
+
+    .roulette-track {
+      display: flex;
+      height: 100%;
+      position: absolute;
+      left: 0;
+      top: 0;
+      transition: transform 4s cubic-bezier(0.15, 0.85, 0.35, 1.2);
+    }
+
+    .prize-item {
+      width: 80px;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      font-size: 24px;
+      border-right: 1px solid rgba(255, 255, 255, 0.05);
+      background: rgba(255, 255, 255, 0.02);
+    }
+
+    .prize-item .value {
+      font-size: 11px;
+      margin-top: 4px;
+      font-weight: bold;
+    }
+
+    .open-btn {
+      width: 100%;
+      max-width: 340px;
+      background: var(--button-color);
+      color: var(--button-text-color);
+      border: none;
+      padding: 14px;
+      border-radius: 12px;
+      font-size: 16px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    .open-btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .close-modal {
+      margin-top: 16px;
+      color: var(--hint-color);
+      font-size: 14px;
+      cursor: pointer;
+    }
+
+    .win-result {
+      margin-top: 16px;
+      font-size: 18px;
+      font-weight: bold;
+      color: #2ed573;
+      height: 24px;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="user-info" id="user-name">Игрок</div>
+    <div class="balance">💰 <span id="balance-val">1000</span></div>
+  </header>
+
+  <main>
+    <h2 class="section-title">Доступные кейсы</h2>
+    <div class="cases-grid">
+      <div class="case-card" onclick="openCaseModal('free')">
+        <div class="case-icon">📦</div>
+        <div class="case-name">Новичок</div>
+        <div class="case-price">100 монет</div>
+      </div>
+      <div class="case-card" onclick="openCaseModal('gold')">
+        <div class="case-icon">🎁</div>
+        <div class="case-name">Золотой</div>
+        <div class="case-price">500 монет</div>
+      </div>
+    </div>
+  </main>
+
+  <!-- Модальное окно -->
+  <div class="modal" id="case-modal">
+    <div class="roulette-container">
+      <div class="roulette-pointer"></div>
+      <div class="roulette-track" id="roulette-track"></div>
+    </div>
+    
+    <div class="win-result" id="win-result"></div>
+    
+    <button class="open-btn" id="spin-btn" onclick="spinRoulette()">Открыть за <span id="modal-price">100</span></button>
+    <div class="close-modal" onclick="closeModal()">Закрыть</div>
+  </div>
+
+  <script>
+    const tg = window.Telegram.WebApp;
+    tg.expand(); // Разворачивает окно на весь экран
+
+    let balance = 1000;
+    let activeCase = null;
+    let isSpinning = false;
+
+    // Отображаем имя пользователя из Telegram
+    if (tg.initDataUnsafe && tg.initDataUnsafe.user) {
+      document.getElementById('user-name').innerText = tg.initDataUnsafe.user.first_name;
+    }
+
+    const casesConfig = {
+      free: { price: 100, items: [10, 50, 100, 150, 200, 300] },
+      gold: { price: 500, items: [200, 400, 600, 800, 1000, 2000] }
+    };
+
+    function updateBalance(amount) {
+      balance += amount;
+      document.getElementById('balance-val').innerText = balance;
+    }
+
+    function openCaseModal(caseType) {
+      if (isSpinning) return;
+      activeCase = casesConfig[caseType];
+      document.getElementById('modal-price').innerText = activeCase.price;
+      document.getElementById('win-result').innerText = '';
+      
+      generateTrack();
+      document.getElementById('case-modal').classList.add('active');
+    }
+
+    function closeModal() {
+      if (isSpinning) return;
+      document.getElementById('case-modal').classList.remove('active');
+    }
+
+    function generateTrack() {
+      const track = document.getElementById('roulette-track');
+      track.style.transition = 'none';
+      track.style.transform = 'translateX(0px)';
+      track.innerHTML = '';
+
+      // Генерируем ленту предметов (50 элементов для рулетки)
+      for (let i = 0; i < 50; i++) {
+        const val = activeCase.items[Math.floor(Math.random() * activeCase.items.length)];
+        const item = document.createElement('div');
+        item.className = 'prize-item';
+        item.innerHTML = `💎<div class="value">${val}</div>`;
+        item.dataset.value = val;
+        track.appendChild(item);
+      }
+    }
+
+    function spinRoulette() {
+      if (isSpinning) return;
+      if (balance < activeCase.price) {
+        tg.showAlert('Недостаточно монет!');
+        return;
+      }
+
+      updateBalance(-activeCase.price);
+      isSpinning = true;
+      document.getElementById('spin-btn').disabled = true;
+      document.getElementById('win-result').innerText = '';
+
+      const track = document.getElementById('roulette-track');
+      const itemWidth = 80;
+      
+      // Намеченный выигрышный элемент (например, 42-й по счету)
+      const targetIndex = 42; 
+      const targetItem = track.children[targetIndex];
+      const winValue = parseInt(targetItem.dataset.value);
+
+      // Рассчитываем смещение рулетки
+      const containerWidth = document.querySelector('.roulette-container').offsetWidth;
+      const offset = (targetIndex * itemWidth) - (containerWidth / 2) + (itemWidth / 2);
+
+      // Запускаем анимацию
+      track.style.transition = 'transform 4s cubic-bezier(0.15, 0.85, 0.35, 1.2)';
+      track.style.transform = `translateX(-${offset}px)`;
+
+      setTimeout(() => {
+        isSpinning = false;
+        document.getElementById('spin-btn').disabled = false;
+        document.getElementById('win-result').innerText = `+${winValue} монет!`;
+        updateBalance(winValue);
+        
+        // Haptic Feedback (вибрация на телефоне)
+        if (tg.HapticFeedback) {
+          tg.HapticFeedback.notificationOccurred('success');
+        }
+      }, 4000);
+    }
+  </script>
+</body>
+</html>
