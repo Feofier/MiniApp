@@ -3,17 +3,20 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>Case Opener Mini App</title>
+  <title>Cyber Games Hub</title>
   <!-- Telegram Web App SDK -->
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
   <style>
     :root {
-      --bg-color: var(--tg-theme-bg-color, #12131c);
-      --text-color: var(--tg-theme-text-color, #ffffff);
-      --hint-color: var(--tg-theme-hint-color, #8a8d9b);
-      --button-color: var(--tg-theme-button-color, #2ea6ff);
-      --button-text-color: var(--tg-theme-button-text-color, #ffffff);
-      --card-bg: #1c1e2d;
+      --bg-color: #080910;
+      --card-bg: #131525;
+      --accent-neon: #00f0ff;
+      --accent-pink: #ff007f;
+      --accent-purple: #9d00ff;
+      --text-main: #ffffff;
+      --text-hint: #8f92a8;
+      --success: #00ff66;
+      --danger: #ff3344;
     }
 
     * {
@@ -26,322 +29,654 @@
 
     body {
       background-color: var(--bg-color);
-      color: var(--text-color);
+      color: var(--text-main);
       min-height: 100vh;
       display: flex;
       flex-direction: column;
+      overflow-x: hidden;
+      background-image: 
+        radial-gradient(circle at 10% 20%, rgba(157, 0, 255, 0.08) 0%, transparent 40%),
+        radial-gradient(circle at 90% 80%, rgba(0, 240, 255, 0.08) 0%, transparent 40%);
     }
 
-    /* Навигация / Шапка */
+    /* Шапка / Навигация */
     header {
       padding: 16px;
       display: flex;
       justify-content: space-between;
       align-items: center;
-      background: var(--card-bg);
-      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+      background: rgba(19, 21, 37, 0.8);
+      backdrop-filter: blur(10px);
+      border-bottom: 1px solid rgba(0, 240, 255, 0.2);
+      position: sticky;
+      top: 0;
+      z-index: 50;
     }
 
-    .user-info {
+    .user-profile {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .avatar {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background: linear-gradient(45deg, var(--accent-neon), var(--accent-pink));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+      box-shadow: 0 0 10px rgba(0, 240, 255, 0.4);
+    }
+
+    .user-name {
+      font-size: 14px;
       font-weight: 600;
-      font-size: 15px;
     }
 
-    .balance {
-      background: rgba(255, 215, 0, 0.15);
-      color: #ffd700;
+    .balance-badge {
+      background: rgba(0, 240, 255, 0.1);
+      border: 1px solid var(--accent-neon);
+      color: var(--accent-neon);
       padding: 6px 12px;
       border-radius: 20px;
       font-weight: bold;
-      font-size: 14px;
+      font-size: 13px;
+      box-shadow: 0 0 8px rgba(0, 240, 255, 0.2);
     }
 
-    /* Главный контейнер */
+    /* Основной контент */
     main {
       flex: 1;
       padding: 16px;
+      padding-bottom: 80px;
     }
 
-    .section-title {
-      font-size: 18px;
-      margin-bottom: 12px;
+    .screen {
+      display: none;
+      animation: fadeIn 0.3s ease;
     }
 
-    /* Сетка кейсов */
-    .cases-grid {
+    .screen.active {
+      display: block;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(6px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .title {
+      font-size: 22px;
+      font-weight: 800;
+      margin-bottom: 16px;
+      letter-spacing: 0.5px;
+      text-shadow: 0 0 10px rgba(0, 240, 255, 0.3);
+    }
+
+    /* Сетка игр (Главный экран) */
+    .games-grid {
       display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: 12px;
+      grid-template-columns: 1fr;
+      gap: 16px;
     }
 
-    .case-card {
+    .game-card {
       background: var(--card-bg);
-      border-radius: 14px;
-      padding: 16px;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      text-align: center;
+      border-radius: 16px;
+      padding: 20px;
       border: 1px solid rgba(255, 255, 255, 0.05);
+      position: relative;
+      overflow: hidden;
       cursor: pointer;
-      transition: transform 0.1s ease;
+      transition: all 0.2s ease;
+      display: flex;
+      align-items: center;
+      gap: 16px;
     }
 
-    .case-card:active {
-      transform: scale(0.97);
+    .game-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; width: 4px; height: 100%;
+      background: var(--accent-neon);
     }
 
-    .case-icon {
-      font-size: 48px;
-      margin-bottom: 8px;
+    .game-card:nth-child(2)::before { background: var(--accent-pink); }
+    .game-card:nth-child(3)::before { background: var(--accent-purple); }
+
+    .game-card:active {
+      transform: scale(0.98);
     }
 
-    .case-name {
-      font-weight: 600;
-      font-size: 15px;
+    .game-icon {
+      font-size: 36px;
+      min-width: 50px;
+      text-align: center;
+    }
+
+    .game-info h3 {
+      font-size: 17px;
       margin-bottom: 4px;
     }
 
-    .case-price {
+    .game-info p {
       font-size: 13px;
-      color: #ffd700;
-      font-weight: 500;
+      color: var(--text-hint);
     }
 
-    /* Модальное окно открытия кейса */
-    .modal {
-      display: none;
+    /* Нижняя панель навигации */
+    nav.bottom-nav {
       position: fixed;
-      inset: 0;
-      background: rgba(0, 0, 0, 0.85);
-      z-index: 100;
-      flex-direction: column;
-      justify-content: center;
-      align-items: center;
-      padding: 20px;
-    }
-
-    .modal.active {
-      display: flex;
-    }
-
-    .roulette-container {
-      width: 100%;
-      max-width: 340px;
-      height: 100px;
-      background: var(--card-bg);
-      border-radius: 12px;
-      position: relative;
-      overflow: hidden;
-      border: 2px solid var(--button-color);
-      margin-bottom: 24px;
-    }
-
-    /* Указатель центра рулетки */
-    .roulette-pointer {
-      position: absolute;
-      top: 0;
-      left: 50%;
-      transform: translateX(-50%);
-      width: 4px;
-      height: 100%;
-      background: #ff4757;
-      z-index: 10;
-      box-shadow: 0 0 8px #ff4757;
-    }
-
-    .roulette-track {
-      display: flex;
-      height: 100%;
-      position: absolute;
+      bottom: 0;
       left: 0;
-      top: 0;
-      transition: transform 4s cubic-bezier(0.15, 0.85, 0.35, 1.2);
+      width: 100%;
+      background: rgba(13, 15, 26, 0.95);
+      backdrop-filter: blur(12px);
+      border-top: 1px solid rgba(255, 255, 255, 0.08);
+      display: flex;
+      justify-content: space-around;
+      padding: 10px 0;
+      z-index: 50;
     }
 
-    .prize-item {
-      width: 80px;
-      height: 100%;
+    .nav-item {
+      background: none;
+      border: none;
+      color: var(--text-hint);
       display: flex;
       flex-direction: column;
       align-items: center;
-      justify-content: center;
-      flex-shrink: 0;
-      font-size: 24px;
-      border-right: 1px solid rgba(255, 255, 255, 0.05);
-      background: rgba(255, 255, 255, 0.02);
-    }
-
-    .prize-item .value {
       font-size: 11px;
-      margin-top: 4px;
-      font-weight: bold;
+      cursor: pointer;
+      transition: color 0.2s;
     }
 
-    .open-btn {
+    .nav-item span {
+      font-size: 20px;
+      margin-bottom: 2px;
+    }
+
+    .nav-item.active {
+      color: var(--accent-neon);
+      text-shadow: 0 0 8px rgba(0, 240, 255, 0.4);
+    }
+
+    /* Универсальные кнопки и элементы */
+    .btn {
       width: 100%;
-      max-width: 340px;
-      background: var(--button-color);
-      color: var(--button-text-color);
-      border: none;
       padding: 14px;
       border-radius: 12px;
-      font-size: 16px;
+      border: none;
       font-weight: bold;
+      font-size: 15px;
       cursor: pointer;
+      transition: all 0.2s;
+      text-align: center;
     }
 
-    .open-btn:disabled {
-      opacity: 0.5;
-      cursor: not-allowed;
+    .btn-neon {
+      background: transparent;
+      color: var(--accent-neon);
+      border: 2px solid var(--accent-neon);
+      box-shadow: 0 0 12px rgba(0, 240, 255, 0.2) inset, 0 0 12px rgba(0, 240, 255, 0.2);
     }
 
-    .close-modal {
-      margin-top: 16px;
-      color: var(--hint-color);
+    .btn-neon:active {
+      background: rgba(0, 240, 255, 0.15);
+    }
+
+    .btn-solid {
+      background: linear-gradient(135deg, var(--accent-neon), var(--accent-purple));
+      color: #000;
+      box-shadow: 0 0 15px rgba(157, 0, 255, 0.4);
+    }
+
+    .back-btn {
+      background: none;
+      border: none;
+      color: var(--text-hint);
       font-size: 14px;
       cursor: pointer;
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
     }
 
-    .win-result {
-      margin-top: 16px;
-      font-size: 18px;
+    /* ЭКРАН ИГРЫ: МАФИЯ */
+    .mafia-role-card {
+      background: var(--card-bg);
+      border-radius: 16px;
+      padding: 24px;
+      text-align: center;
+      border: 1px solid rgba(255, 51, 68, 0.3);
+      margin-bottom: 20px;
+      box-shadow: 0 0 20px rgba(255, 51, 68, 0.1);
+    }
+
+    .role-title {
+      font-size: 22px;
       font-weight: bold;
-      color: #2ed573;
-      height: 24px;
+      color: var(--danger);
+      margin: 10px 0;
+    }
+
+    .role-desc {
+      font-size: 14px;
+      color: var(--text-hint);
+      line-height: 1.4;
+    }
+
+    /* ЭКРАН ИГРЫ: ШПИОН */
+    .spy-card {
+      background: var(--card-bg);
+      border-radius: 16px;
+      padding: 24px;
+      text-align: center;
+      border: 1px solid rgba(0, 240, 255, 0.3);
+      margin-bottom: 20px;
+    }
+
+    /* ЭКРАН ИГРЫ: КАЗИНО (СЛОТЫ) */
+    .casino-container {
+      background: var(--card-bg);
+      border-radius: 16px;
+      padding: 20px;
+      text-align: center;
+      border: 1px solid rgba(255, 0, 127, 0.3);
+      box-shadow: 0 0 20px rgba(255, 0, 127, 0.1);
+      margin-bottom: 16px;
+    }
+
+    .slot-machine {
+      display: flex;
+      justify-content: center;
+      gap: 12px;
+      margin: 20px 0;
+      background: #0d0f1a;
+      padding: 16px;
+      border-radius: 12px;
+      border: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    .slot-reel {
+      font-size: 36px;
+      width: 60px;
+      height: 70px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #181b2e;
+      border-radius: 8px;
+      border: 1px solid rgba(0, 240, 255, 0.2);
+    }
+
+    .bet-selector {
+      display: flex;
+      justify-content: center;
+      gap: 8px;
+      margin-bottom: 16px;
+    }
+
+    .bet-btn {
+      background: #181b2e;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      color: var(--text-main);
+      padding: 8px 14px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: 600;
+    }
+
+    .bet-btn.active {
+      border-color: var(--accent-pink);
+      color: var(--accent-pink);
+      box-shadow: 0 0 8px rgba(255, 0, 127, 0.3);
+    }
+
+    /* ПРОФИЛЬ / СТАТИСТИКА */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+
+    .stat-card {
+      background: var(--card-bg);
+      padding: 16px;
+      border-radius: 14px;
+      border: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    .stat-value {
+      font-size: 20px;
+      font-weight: bold;
+      color: var(--accent-neon);
+      margin-top: 4px;
+    }
+
+    .stat-label {
+      font-size: 12px;
+      color: var(--text-hint);
     }
   </style>
 </head>
 <body>
 
+  <!-- Шапка -->
   <header>
-    <div class="user-info" id="user-name">Игрок</div>
-    <div class="balance">💰 <span id="balance-val">1000</span></div>
+    <div class="user-profile">
+      <div class="avatar" id="user-avatar">C</div>
+      <div class="user-name" id="user-name">CyberUser</div>
+    </div>
+    <div class="balance-badge">⚡ <span id="balance-val">2500</span></div>
   </header>
 
+  <!-- Основной контент -->
   <main>
-    <h2 class="section-title">Доступные кейсы</h2>
-    <div class="cases-grid">
-      <div class="case-card" onclick="openCaseModal('free')">
-        <div class="case-icon">📦</div>
-        <div class="case-name">Новичок</div>
-        <div class="case-price">100 монет</div>
-      </div>
-      <div class="case-card" onclick="openCaseModal('gold')">
-        <div class="case-icon">🎁</div>
-        <div class="case-name">Золотой</div>
-        <div class="case-price">500 монет</div>
+
+    <!-- ЭКРАН 1: ГЛАВНАЯ (ИГРЫ) -->
+    <div id="screen-home" class="screen active">
+      <h1 class="title">КИБЕР ЗОНА</h1>
+      <div class="games-grid">
+        <div class="game-card" onclick="openGame('mafia')">
+          <div class="game-icon">🕶️</div>
+          <div class="game-info">
+            <h3>Мафия</h3>
+            <p>Генератор ролей и ночных ходов</p>
+          </div>
+        </div>
+
+        <div class="game-card" onclick="openGame('spy')">
+          <div class="game-icon">🕵️‍♂️</div>
+          <div class="game-info">
+            <h3>Шпион</h3>
+            <p>Найди тайную локацию или вычисли шпиона</p>
+          </div>
+        </div>
+
+        <div class="game-card" onclick="openGame('casino')">
+          <div class="game-icon">🎰</div>
+          <div class="game-info">
+            <h3>Кибер Слоты</h3>
+            <p>Испытай удачу на виртуальные кредиты</p>
+          </div>
+        </div>
       </div>
     </div>
+
+    <!-- ЭКРАН ИГРЫ: МАФИЯ -->
+    <div id="screen-mafia" class="screen">
+      <button class="back-btn" onclick="goHome()">← Назад к играм</button>
+      <h1 class="title">Генератор ролей</h1>
+      
+      <div class="mafia-role-card">
+        <div style="font-size: 40px;" id="mafia-emoji">❓</div>
+        <div class="role-title" id="mafia-role-name">Нажми кнопку ниже</div>
+        <div class="role-desc" id="mafia-role-desc">Получи свою секретную роль для партии с друзьями.</div>
+      </div>
+
+      <button class="btn btn-neon" onclick="generateMafiaRole()">Раздать роль</button>
+    </div>
+
+    <!-- ЭКРАН ИГРЫ: ШПИОН -->
+    <div id="screen-spy" class="screen">
+      <button class="back-btn" onclick="goHome()">← Назад к играм</button>
+      <h1 class="title">Игра: Шпион</h1>
+
+      <div class="spy-card">
+        <div style="font-size: 40px;" id="spy-emoji">📍</div>
+        <div style="font-size: 18px; font-weight: bold; margin: 12px 0;" id="spy-location">Секретная локация</div>
+        <div class="role-desc" id="spy-desc">Передайте телефон игроку, чтобы узнать его статус.</div>
+      </div>
+
+      <button class="btn btn-neon" onclick="generateSpyCard()">Узнать свою карту</button>
+    </div>
+
+    <!-- ЭКРАН ИГРЫ: КАЗИНО (СЛОТЫ) -->
+    <div id="screen-casino" class="screen">
+      <button class="back-btn" onclick="goHome()">← Назад к играм</button>
+      <h1 class="title">Кибер Слоты</h1>
+
+      <div class="casino-container">
+        <div class="slot-machine">
+          <div class="slot-reel" id="reel-1">🍒</div>
+          <div class="slot-reel" id="reel-2">🍋</div>
+          <div class="slot-reel" id="reel-3">💎</div>
+        </div>
+        
+        <div class="bet-selector">
+          <button class="bet-btn active" onclick="setBet(50, this)">50</button>
+          <button class="bet-btn" onclick="setBet(100, this)">100</button>
+          <button class="bet-btn" onclick="setBet(250, this)">250</button>
+          <button class="bet-btn" onclick="setBet(500, this)">500</button>
+        </div>
+
+        <div id="casino-msg" style="font-size: 14px; color: var(--text-hint); margin-bottom: 14px; min-height: 20px;">Сделай ставку и крути барабан!</div>
+
+        <button class="btn btn-solid" id="spin-btn" onclick="spinSlots()">КРУТИТЬ</button>
+      </div>
+    </div>
+
+    <!-- ЭКРАН 2: ЛИЧНЫЙ КАБИНЕТ -->
+    <div id="screen-profile" class="screen">
+      <h1 class="title">Личный кабинет</h1>
+
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-label">Игр сыграно</div>
+          <div class="stat-value" id="stat-games">0</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Побед в казино</div>
+          <div class="stat-value" id="stat-wins">0</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Текущий банк</div>
+          <div class="stat-value" id="stat-balance">2500</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Ранг</div>
+          <div class="stat-value" style="color: var(--accent-pink);">Cyber Pro</div>
+        </div>
+      </div>
+
+      <button class="btn btn-neon" onclick="resetStats()">Сбросить статистику</button>
+    </div>
+
   </main>
 
-  <!-- Модальное окно -->
-  <div class="modal" id="case-modal">
-    <div class="roulette-container">
-      <div class="roulette-pointer"></div>
-      <div class="roulette-track" id="roulette-track"></div>
-    </div>
-    
-    <div class="win-result" id="win-result"></div>
-    
-    <button class="open-btn" id="spin-btn" onclick="spinRoulette()">Открыть за <span id="modal-price">100</span></button>
-    <div class="close-modal" onclick="closeModal()">Закрыть</div>
-  </div>
+  <!-- Нижнее меню -->
+  <nav class="bottom-nav">
+    <button class="nav-item active" id="nav-home" onclick="switchTab('home')">
+      <span>🕹️</span>Игры
+    </button>
+    <button class="nav-item" id="nav-profile" onclick="switchTab('profile')">
+      <span>👤</span>Профиль
+    </button>
+  </nav>
 
   <script>
     const tg = window.Telegram.WebApp;
-    tg.expand(); // Разворачивает окно на весь экран
+    tg.expand();
 
-    let balance = 1000;
-    let activeCase = null;
-    let isSpinning = false;
-
-    // Отображаем имя пользователя из Telegram
-    if (tg.initDataUnsafe && tg.initDataUnsafe.user) {
-      document.getElementById('user-name').innerText = tg.initDataUnsafe.user.first_name;
-    }
-
-    const casesConfig = {
-      free: { price: 100, items: [10, 50, 100, 150, 200, 300] },
-      gold: { price: 500, items: [200, 400, 600, 800, 1000, 2000] }
+    // Данные пользователя и статистика
+    let balance = 2500;
+    let stats = {
+      gamesPlayed: 0,
+      casinoWins: 0
     };
 
-    function updateBalance(amount) {
-      balance += amount;
+    // Загрузка данных из LocalStorage если есть
+    if (localStorage.getItem('cyber_balance')) {
+      balance = parseInt(localStorage.getItem('cyber_balance'));
+      stats = JSON.parse(localStorage.getItem('cyber_stats')) || stats;
+    }
+
+    updateUI();
+
+    // Инициализация имени из Telegram
+    if (tg.initDataUnsafe && tg.initDataUnsafe.user) {
+      const user = tg.initDataUnsafe.user;
+      document.getElementById('user-name').innerText = user.first_name;
+      document.getElementById('user-avatar').innerText = user.first_name.charAt(0).toUpperCase();
+    }
+
+    function saveState() {
+      localStorage.setItem('cyber_balance', balance);
+      localStorage.setItem('cyber_stats', JSON.stringify(stats));
+      updateUI();
+    }
+
+    function updateUI() {
       document.getElementById('balance-val').innerText = balance;
+      document.getElementById('stat-balance').innerText = balance;
+      document.getElementById('stat-games').innerText = stats.gamesPlayed;
+      document.getElementById('stat-wins').innerText = stats.casinoWins;
     }
 
-    function openCaseModal(caseType) {
-      if (isSpinning) return;
-      activeCase = casesConfig[caseType];
-      document.getElementById('modal-price').innerText = activeCase.price;
-      document.getElementById('win-result').innerText = '';
-      
-      generateTrack();
-      document.getElementById('case-modal').classList.add('active');
-    }
+    // Навигация по вкладкам
+    function switchTab(tab) {
+      document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+      document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
 
-    function closeModal() {
-      if (isSpinning) return;
-      document.getElementById('case-modal').classList.remove('active');
-    }
-
-    function generateTrack() {
-      const track = document.getElementById('roulette-track');
-      track.style.transition = 'none';
-      track.style.transform = 'translateX(0px)';
-      track.innerHTML = '';
-
-      // Генерируем ленту предметов (50 элементов для рулетки)
-      for (let i = 0; i < 50; i++) {
-        const val = activeCase.items[Math.floor(Math.random() * activeCase.items.length)];
-        const item = document.createElement('div');
-        item.className = 'prize-item';
-        item.innerHTML = `💎<div class="value">${val}</div>`;
-        item.dataset.value = val;
-        track.appendChild(item);
+      if (tab === 'home') {
+        document.getElementById('screen-home').classList.add('active');
+        document.getElementById('nav-home').classList.add('active');
+      } else if (tab === 'profile') {
+        document.getElementById('screen-profile').classList.add('active');
+        document.getElementById('nav-profile').classList.add('active');
       }
     }
 
-    function spinRoulette() {
-      if (isSpinning) return;
-      if (balance < activeCase.price) {
-        tg.showAlert('Недостаточно монет!');
+    function openGame(gameName) {
+      document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+      document.getElementById(`screen-${gameName}`).classList.add('active');
+      stats.gamesPlayed++;
+      saveState();
+    }
+
+    function goHome() {
+      switchTab('home');
+    }
+
+    // --- ЛОГИКА: МАФИЯ ---
+    const mafiaRoles = [
+      { name: "Мирный житель", emoji: "👤", desc: "Вы честный гражданин. Ваша задача — вычислить мафию во время дневного голосования." },
+      { name: "Мафия", emoji: "🕶️", desc: "Вы преступник. Каждую ночь вы выбираете жертву вместе с другими членами мафии." },
+      { name: "Детектив", emoji: "🔍", desc: "Вы представитель закона. Каждую ночь вы можете проверить статус одного из игроков." },
+      { name: "Доктор", emoji: "💉", desc: "Вы врач. Каждую ночь вы можете вылечить одного игрока, защитив его от мафии." }
+    ];
+
+    function generateMafiaRole() {
+      const randomRole = mafiaRoles[Math.floor(Math.random() * mafiaRoles.length)];
+      document.getElementById('mafia-emoji').innerText = randomRole.emoji;
+      document.getElementById('mafia-role-name').innerText = randomRole.name;
+      document.getElementById('mafia-role-desc').innerText = randomRole.desc;
+      
+      if (tg.HapticFeedback) tg.HapticFeedback.impactOccurred('medium');
+    }
+
+    // --- ЛОГИКА: ШПИОН ---
+    const locations = ["Банк", "Пляж", "Космолет", "Ресторан", "Киностудия", "Больница", "Казино", "Полицейский участок"];
+    
+    function generateSpyCard() {
+      const isSpy = Math.random() < 0.25; // 25% шанс стать шпионом
+      const loc = locations[Math.floor(Math.random() * locations.length)];
+      
+      if (isSpy) {
+        document.getElementById('spy-emoji').innerText = "🕵️‍♂️";
+        document.getElementById('spy-location').innerText = "Вы ШПИОН!";
+        document.getElementById('spy-desc').innerText = "Вы не знаете локацию. Пытайтесь не спалиться и угадать её по разговорам других!";
+      } else {
+        document.getElementById('spy-emoji').innerText = "📍";
+        document.getElementById('spy-location').innerText = `Локация: ${loc}`;
+        document.getElementById('spy-desc').innerText = "Вы мирный игрок. Задавайте наводящие вопросы, чтобы выявить шпиона.";
+      }
+      if (tg.HapticFeedback) tg.HapticFeedback.impactOccurred('medium');
+    }
+
+    // --- ЛОГИКА: КАЗИНО (СЛОТЫ) ---
+    let currentBet = 50;
+    const slotSymbols = ['🍒', '🍋', '🔔', '💎', '7️⃣'];
+
+    function setBet(amount, btnElement) {
+      document.querySelectorAll('.bet-btn').forEach(b => b.classList.remove('active'));
+      btnElement.classList.add('active');
+      currentBet = amount;
+    }
+
+    function spinSlots() {
+      if (balance < currentBet) {
+        tg.showAlert("Недостаточно кибер-кредитов!");
         return;
       }
 
-      updateBalance(-activeCase.price);
-      isSpinning = true;
-      document.getElementById('spin-btn').disabled = true;
-      document.getElementById('win-result').innerText = '';
+      balance -= currentBet;
+      updateUI();
 
-      const track = document.getElementById('roulette-track');
-      const itemWidth = 80;
-      
-      // Намеченный выигрышный элемент (например, 42-й по счету)
-      const targetIndex = 42; 
-      const targetItem = track.children[targetIndex];
-      const winValue = parseInt(targetItem.dataset.value);
+      const btn = document.getElementById('spin-btn');
+      btn.disabled = true;
+      document.getElementById('casino-msg').innerText = "Барабаны крутятся...";
 
-      // Рассчитываем смещение рулетки
-      const containerWidth = document.querySelector('.roulette-container').offsetWidth;
-      const offset = (targetIndex * itemWidth) - (containerWidth / 2) + (itemWidth / 2);
+      let r1 = document.getElementById('reel-1');
+      let r2 = document.getElementById('reel-2');
+      let r3 = document.getElementById('reel-3');
 
-      // Запускаем анимацию
-      track.style.transition = 'transform 4s cubic-bezier(0.15, 0.85, 0.35, 1.2)';
-      track.style.transform = `translateX(-${offset}px)`;
+      let spins = 0;
+      let interval = setInterval(() => {
+        r1.innerText = slotSymbols[Math.floor(Math.random() * slotSymbols.length)];
+        r2.innerText = slotSymbols[Math.floor(Math.random() * slotSymbols.length)];
+        r3.innerText = slotSymbols[Math.floor(Math.random() * slotSymbols.length)];
+        spins++;
 
-      setTimeout(() => {
-        isSpinning = false;
-        document.getElementById('spin-btn').disabled = false;
-        document.getElementById('win-result').innerText = `+${winValue} монет!`;
-        updateBalance(winValue);
-        
-        // Haptic Feedback (вибрация на телефоне)
-        if (tg.HapticFeedback) {
-          tg.HapticFeedback.notificationOccurred('success');
+        if (spins > 15) {
+          clearInterval(interval);
+          
+          // Финальные символы
+          const final1 = slotSymbols[Math.floor(Math.random() * slotSymbols.length)];
+          const final2 = slotSymbols[Math.floor(Math.random() * slotSymbols.length)];
+          const final3 = slotSymbols[Math.floor(Math.random() * slotSymbols.length)];
+
+          r1.innerText = final1;
+          r2.innerText = final2;
+          r3.innerText = final3;
+
+          let winMultiplier = 0;
+          if (final1 === final2 && final2 === final3) {
+            if (final1 === '7️⃣') winMultiplier = 10;
+            else if (final1 === '💎') winMultiplier = 5;
+            else winMultiplier = 3;
+          } else if (final1 === final2 || final2 === final3 || final1 === final3) {
+            winMultiplier = 1.5;
+          }
+
+          if (winMultiplier > 0) {
+            let winAmount = Math.floor(currentBet * winMultiplier);
+            balance += winAmount;
+            stats.casinoWins++;
+            document.getElementById('casino-msg').innerHTML = `<span style="color: var(--success)">ПОБЕДА! +${winAmount} кредитов!</span>`;
+            if (tg.HapticFeedback) tg.HapticFeedback.notificationOccurred('success');
+          } else {
+            document.getElementById('casino-msg').innerHTML = `<span style="color: var(--danger)">Мимо! Попробуйте еще раз.</span>`;
+            if (tg.HapticFeedback) tg.HapticFeedback.notificationOccurred('error');
+          }
+
+          btn.disabled = false;
+          saveState();
         }
-      }, 4000);
+      }, 100);
+    }
+
+    function resetStats() {
+      balance = 2500;
+      stats = { gamesPlayed: 0, casinoWins: 0 };
+      saveState();
+      tg.showAlert("Статистика сброшена!");
     }
   </script>
 </body>
